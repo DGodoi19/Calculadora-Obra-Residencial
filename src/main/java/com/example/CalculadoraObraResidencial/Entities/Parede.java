@@ -1,16 +1,9 @@
-package com.example.CalculadoraObraResidencial;
+package com.example.CalculadoraObraResidencial.Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 
 @Entity
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Parede {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +44,65 @@ public class Parede {
         return areaBruta - (descontoPorta + descontoJanela);
     }
 
+    public long getID() {
+        return ID;
+    }
 
+    public void setID(long ID) {
+        this.ID = ID;
+    }
+
+    public Double getComprimento() {
+        return comprimento;
+    }
+
+    public void setComprimento(Double comprimento) {
+        this.comprimento = comprimento;
+    }
+
+    public Double getLargura() {
+        return largura;
+    }
+
+    public void setLargura(Double largura) {
+        this.largura = largura;
+    }
+
+    public Double getAltura() {
+        return altura;
+    }
+
+    public void setAltura(Double altura) {
+        this.altura = altura;
+    }
+
+    public Buraco getPorta() {
+        return porta;
+    }
+
+    public void setPorta(Buraco porta) {
+        this.porta = porta;
+    }
+
+    public Buraco getJanela() {
+        return janela;
+    }
+
+    public void setJanela(Buraco janela) {
+        this.janela = janela;
+    }
+
+    public Parede(long ID, Double comprimento, Double largura, Double altura, Buraco porta, Buraco janela) {
+        this.ID = ID;
+        this.comprimento = comprimento;
+        this.largura = largura;
+        this.altura = altura;
+        this.porta = porta;
+        this.janela = janela;
+    }
+
+    public Parede() {
+    }
 }
 
 

@@ -1,5 +1,6 @@
-package com.example.CalculadoraObraResidencial;
+package com.example.CalculadoraObraResidencial.Repository;
 
+import com.example.CalculadoraObraResidencial.Entities.Parede;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
