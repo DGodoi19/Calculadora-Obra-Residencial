@@ -1,55 +1,38 @@
 package com.example.CalculadoraObraResidencial.DTO;
 
-
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 
-
 public class ProjetoCalculoDTO {
-    private List<Long> paredesIds;
+
+    @NotEmpty(message = "Lista de IDs de paredes não pode ser vazia")
+    private List<Long> paredeIds;
+
+    @NotNull(message = "Altura da viga baldrame é obrigatória")
+    @Positive(message = "Altura da viga baldrame deve ser positiva")
     private Double alturaVigaBaldrame;
 
-    private Double comprimentoTijolos;
-    private Double alturaTijolos;
+    @NotNull(message = "Comprimento do tijolo é obrigatório")
+    @Positive(message = "Comprimento do tijolo deve ser positivo")
+    private Double comprimentoTijolo;
 
-    public List<Long> getParedesIds() {
-        return paredesIds;
-    }
+    @NotNull(message = "Altura do tijolo é obrigatória")
+    @Positive(message = "Altura do tijolo deve ser positiva")
+    private Double alturaTijolo;
 
-    public void setParedesIds(List<Long> paredesIds) {
-        this.paredesIds = paredesIds;
-    }
+    public ProjetoCalculoDTO() {}
 
-    public Double getAlturaVigaBaldrame() {
-        return alturaVigaBaldrame;
-    }
+    public List<Long> getParedeIds() { return paredeIds; }
+    public void setParedeIds(List<Long> paredeIds) { this.paredeIds = paredeIds; }
 
-    public void setAlturaVigaBaldrame(Double alturaVigaBaldrame) {
-        this.alturaVigaBaldrame = alturaVigaBaldrame;
-    }
+    public Double getAlturaVigaBaldrame() { return alturaVigaBaldrame; }
+    public void setAlturaVigaBaldrame(Double alturaVigaBaldrame) { this.alturaVigaBaldrame = alturaVigaBaldrame; }
 
-    public Double getComprimentoTijolos() {
-        return comprimentoTijolos;
-    }
+    public Double getComprimentoTijolo() { return comprimentoTijolo; }
+    public void setComprimentoTijolo(Double comprimentoTijolo) { this.comprimentoTijolo = comprimentoTijolo; }
 
-    public void setComprimentoTijolos(Double comprimentoTijolos) {
-        this.comprimentoTijolos = comprimentoTijolos;
-    }
-
-    public Double getAlturaTijolos() {
-        return alturaTijolos;
-    }
-
-    public void setAlturaTijolos(Double alturaTijolos) {
-        this.alturaTijolos = alturaTijolos;
-    }
-
-    public ProjetoCalculoDTO(List<Long> paredesIds, Double alturaVigaBaldrame, Double comprimentoTijolos, Double alturaTijolos) {
-        this.paredesIds = paredesIds;
-        this.alturaVigaBaldrame = alturaVigaBaldrame;
-        this.comprimentoTijolos = comprimentoTijolos;
-        this.alturaTijolos = alturaTijolos;
-    }
-
-    public ProjetoCalculoDTO() {
-    }
+    public Double getAlturaTijolo() { return alturaTijolo; }
+    public void setAlturaTijolo(Double alturaTijolo) { this.alturaTijolo = alturaTijolo; }
 }

@@ -1,39 +1,54 @@
 package com.example.CalculadoraObraResidencial.Entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-@Entity
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
+@Entity
 public class Pilar {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Nome do pilar é obrigatório")
     private String nome;
 
-    public Long getId() {
-        return id;
-    }
+    @Positive(message = "Largura deve ser positiva")
+    private Double largura;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Positive(message = "Profundidade deve ser positiva")
+    private Double profundidade;
 
-    public String getNome() {
-        return nome;
-    }
+    @Positive(message = "Altura deve ser positiva")
+    private Double altura;
 
-    public void setNome(String nome) {
+    public Pilar() {}
+
+    public Pilar(String nome, Double largura, Double profundidade, Double altura) {
         this.nome = nome;
+        this.largura = largura;
+        this.profundidade = profundidade;
+        this.altura = altura;
     }
 
-    public Pilar() {
+    public Double calcularVolume() {
+        if (largura == null || profundidade == null || altura == null) return 0.0;
+        return largura * profundidade * altura;
     }
 
-    public Pilar(Long id, String nome) {
-        this.id = id;
-        this.nome = nome;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public Double getLargura() { return largura; }
+    public void setLargura(Double largura) { this.largura = largura; }
+
+    public Double getProfundidade() { return profundidade; }
+    public void setProfundidade(Double profundidade) { this.profundidade = profundidade; }
+
+    public Double getAltura() { return altura; }
+    public void setAltura(Double altura) { this.altura = altura; }
 }

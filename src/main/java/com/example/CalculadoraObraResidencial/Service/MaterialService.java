@@ -1,8 +1,10 @@
 package com.example.CalculadoraObraResidencial.Service;
 
-import com.example.CalculadoraObraResidencial.Entities.Parede;
-import com.example.CalculadoraObraResidencial.Repository.ParedeRepository;
 import com.example.CalculadoraObraResidencial.DTO.ProjetoCalculoDTO;
+import com.example.CalculadoraObraResidencial.DTO.ResultadoCalculoDTO;
+import com.example.CalculadoraObraResidencial.Entities.Parede;
+import com.example.CalculadoraObraResidencial.Exception.RecursoNaoEncontradoException;
+import com.example.CalculadoraObraResidencial.Repository.ParedeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,11 @@ public class MaterialService {
     @Autowired
     private ParedeRepository repository;
 
-    public String calcularProjetoCompleto(ProjetoCalculoDTO projeto) {
-        List<Parede> paredes = repository.findAllById(projeto.getParedesIds());
+    public ResultadoCalculoDTO calcularProjetoCompleto(ProjetoCalculoDTO projeto) {
+        List<Parede> paredes = repository.findAllById(projeto.getParedeIds());
 
         if (paredes.isEmpty()) {
-            return "Nenhuma parede encontrada para os IDs informados.";
+            throw new RecursoNaoEncontradoException("Nenhuma parede encontrada para os IDs informados.");
         }
 
         double volumeConcretoTotal = paredes.stream()
@@ -26,19 +28,19 @@ public class MaterialService {
                 .sum();
 
         double areaLiquidaTotal = paredes.stream()
-                .mapToDouble(Parede::calcularAreaDesconto)
+                .mapToDouble(Parede::calcularAreaLiquida)
                 .sum();
 
-        double areaUnitáriaTijolo = projeto.getComprimentoTijolos() * projeto.getAlturaTijolos();
-        long quantidadeTijolos = (long) Math.ceil(areaLiquidaTotal / areaUnitáriaTijolo);
+        double areaUnitariaTijolo = projeto.getComprimentoTijolo() * projeto.getAlturaTijolo();
+        long quantidadeTijolos = areaUnitariaTijolo > 0
+                ? (long) Math.ceil(areaLiquidaTotal / areaUnitariaTijolo)
+                : 0L;
 
-        return String.format(
-                "--- RELATÓRIO DE MATERIAIS (PROCESSADO NO SERVICE) ---\n" +
-                        "Paredes Analisadas: %d\n" +
-                        "Volume de Concreto: %.2f m³\n" +
-                        "Total de Tijolos: %d unidades\n" +
-                        "Área Líquida Total: %.2f m²",
-                paredes.size(), volumeConcretoTotal, quantidadeTijolos, areaLiquidaTotal
+        return new ResultadoCalculoDTO(
+                paredes.size(),
+                areaLiquidaTotal,
+                volumeConcretoTotal,
+                quantidadeTijolos
         );
     }
 }

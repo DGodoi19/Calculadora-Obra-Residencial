@@ -1,64 +1,42 @@
 package com.example.CalculadoraObraResidencial.Controller;
 
-import com.example.CalculadoraObraResidencial.Entities.Parede;
-import com.example.CalculadoraObraResidencial.Repository.ParedeRepository;
+import com.example.CalculadoraObraResidencial.DTO.*;
+import com.example.CalculadoraObraResidencial.Service.ParedeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/paredes")
 public class ParedeController {
 
     @Autowired
-    private ParedeRepository repository;
+    private ParedeService paredeService;
+
 
     @PostMapping
-    public Parede criarParede(@RequestBody Parede parede) {
-        return repository.save(parede);
+    public ResponseEntity<ParedeResponseDTO> criarParede(@Valid @RequestBody ParedeRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paredeService.criar(dto));
     }
+
 
     @GetMapping
-    public List<Parede> listarTodas() {
-        return repository.findAll();
+    public ResponseEntity<List<ParedeResponseDTO>> listarTodas() {
+        return ResponseEntity.ok(paredeService.listarTodas());
     }
+
 
     @PostMapping("/calculo/concreto")
-    public String calcularVolumeLote(@RequestBody Map<String, Object> payload) {
-        List<Integer> idsInt = (List<Integer>) payload.get("ids");
-        Double alturaViga = Double.parseDouble(payload.get("alturaViga").toString());
-
-        List<Long> ids = idsInt.stream().map(Integer::longValue).toList();
-        List<Parede> paredes = repository.findAllById(ids);
-
-        double volumeTotal = paredes.stream()
-                .mapToDouble(p -> (p.getComprimento() * p.getLargura() * alturaViga))
-                .sum();
-
-        return String.format("Volume total de concreto para as vigas baldrames: %.2f m³", volumeTotal);
+    public ResponseEntity<String> calcularVolumeConcreto(@Valid @RequestBody ConcretoRequestDTO dto) {
+        return ResponseEntity.ok(paredeService.calcularVolumeConcreto(dto));
     }
-
 
     @PostMapping("/calculo/tijolos")
-    public String calcularTijolosLote(@RequestBody Map<String, Object> payload) {
-        List<Integer> idsInt = (List<Integer>) payload.get("ids");
-        Double alturaTijolo = Double.parseDouble(payload.get("alturaTijolo").toString());
-        Double comprimentoTijolo = Double.parseDouble(payload.get("comprimentoTijolo").toString());
-
-        List<Long> ids = idsInt.stream().map(Integer::longValue).toList();
-        List<Parede> paredes = repository.findAllById(ids);
-
-        double areaLiquidaTotal = paredes.stream()
-                .mapToDouble(Parede::calcularAreaDesconto)
-                .sum();
-
-        double areaUmTijolo = alturaTijolo * comprimentoTijolo;
-        long totalTijolos = (long) Math.ceil(areaLiquidaTotal / areaUmTijolo);
-
-        return String.format("Quantidade total de tijolos necessária: %d unidades", totalTijolos);
+    public ResponseEntity<String> calcularTijolos(@Valid @RequestBody TijoloRequestDTO dto) {
+        return ResponseEntity.ok(paredeService.calcularTijolos(dto));
     }
 }
-
-

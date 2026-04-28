@@ -1,64 +1,43 @@
 package com.example.CalculadoraObraResidencial.Entities;
 
 import jakarta.persistence.*;
-
-
+import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-
 public class Projeto {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
 
-        private String nomeProjeto;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        @OneToMany(cascade = CascadeType.ALL)
-        private List<Comodo> comodos;
+    @NotBlank(message = "Nome do projeto é obrigatório")
+    private String nomeProjeto;
 
-        @OneToMany(cascade = CascadeType.ALL)
-        private List<Pilar> pilares;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "projeto_id")
+    private List<Comodo> comodos = new ArrayList<>();
 
-        public Long getId() {
-                return id;
-        }
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "projeto_id")
+    private List<Pilar> pilares = new ArrayList<>();
 
-        public void setId(Long id) {
-                this.id = id;
-        }
+    public Projeto() {}
 
-        public String getNomeProjeto() {
-                return nomeProjeto;
-        }
+    public Projeto(String nomeProjeto) {
+        this.nomeProjeto = nomeProjeto;
+    }
 
-        public void setNomeProjeto(String nomeProjeto) {
-                this.nomeProjeto = nomeProjeto;
-        }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-        public List<Comodo> getComodos() {
-                return comodos;
-        }
+    public String getNomeProjeto() { return nomeProjeto; }
+    public void setNomeProjeto(String nomeProjeto) { this.nomeProjeto = nomeProjeto; }
 
-        public void setComodos(List<Comodo> comodos) {
-                this.comodos = comodos;
-        }
+    public List<Comodo> getComodos() { return comodos; }
+    public void setComodos(List<Comodo> comodos) { this.comodos = comodos; }
 
-        public List<Pilar> getPilares() {
-                return pilares;
-        }
-
-        public void setPilares(List<Pilar> pilares) {
-                this.pilares = pilares;
-        }
-
-        public Projeto(Long id, String nomeProjeto, List<Comodo> comodos, List<Pilar> pilares) {
-                this.id = id;
-                this.nomeProjeto = nomeProjeto;
-                this.comodos = comodos;
-                this.pilares = pilares;
-        }
-
-        public Projeto() {
-        }
+    public List<Pilar> getPilares() { return pilares; }
+    public void setPilares(List<Pilar> pilares) { this.pilares = pilares; }
 }
