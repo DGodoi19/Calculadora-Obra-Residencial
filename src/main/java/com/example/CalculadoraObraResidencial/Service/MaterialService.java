@@ -8,6 +8,8 @@ import com.example.CalculadoraObraResidencial.Repository.ParedeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -23,24 +25,42 @@ public class MaterialService {
             throw new RecursoNaoEncontradoException("Nenhuma parede encontrada para os IDs informados.");
         }
 
-        double volumeConcretoTotal = paredes.stream()
-                .mapToDouble(p -> p.getComprimento() * p.getLargura() * projeto.getAlturaVigaBaldrame())
-                .sum();
+        // Usa BigDecimal para evitar erros de ponto flutuante (ex: 0.30000000000000004)
+        BigDecimal volumeConcreto = paredes.stream()
+                .map(p -> bd(p.getComprimento())
+                        .multiply(bd(p.getLargura()))
+                        .multiply(bd(projeto.getAlturaVigaBaldrame())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        double areaLiquidaTotal = paredes.stream()
-                .mapToDouble(Parede::calcularAreaLiquida)
-                .sum();
+        BigDecimal areaLiquida = paredes.stream()
+                .map(p -> bd(p.calcularAreaLiquida()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        double areaUnitariaTijolo = projeto.getComprimentoTijolo() * projeto.getAlturaTijolo();
-        long quantidadeTijolos = areaUnitariaTijolo > 0
-                ? (long) Math.ceil(areaLiquidaTotal / areaUnitariaTijolo)
-                : 0L;
+        BigDecimal areaUnitariaTijolo = bd(projeto.getComprimentoTijolo())
+                .multiply(bd(projeto.getAlturaTijolo()));
+
+        long quantidadeTijolos = 0;
+        if (areaUnitariaTijolo.compareTo(BigDecimal.ZERO) > 0) {
+            quantidadeTijolos = areaLiquida
+                    .divide(areaUnitariaTijolo, 10, RoundingMode.HALF_UP)
+                    .setScale(0, RoundingMode.CEILING)
+                    .longValue();
+        }
 
         return new ResultadoCalculoDTO(
                 paredes.size(),
-                areaLiquidaTotal,
-                volumeConcretoTotal,
+                round2(areaLiquida),
+                round2(volumeConcreto),
                 quantidadeTijolos
         );
+    }
+
+    private BigDecimal bd(Double value) {
+        if (value == null) return BigDecimal.ZERO;
+        return BigDecimal.valueOf(value);
+    }
+
+    private Double round2(BigDecimal value) {
+        return value.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 }

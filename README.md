@@ -1,15 +1,37 @@
 # Calculadora de Materiais para Obra Residencial
 
-Atividade Avaliativa — Desenvolvimento de Sistemas (UniCEUB)
+Sistema de backend desenvolvido para a disciplina de **Desenvolvimento de Sistemas** na **UniCEUB**. O projeto utiliza **Java 21** e **Spring Boot** para realizar cálculos de estimativa de materiais de construção (volume de concreto e quantidade de tijolos) baseados na modelagem de uma planta residencial como grafo **G=(V,A)**.
 
-## Como executar
+## Sobre o Projeto
+
+A aplicação permite que o usuário selecione paredes cadastradas no sistema e informe parâmetros de construção para obter um relatório detalhado de insumos. O diferencial técnico é o cálculo de **área líquida**, que desconta automaticamente os vãos de portas e janelas das superfícies das paredes.
+
+### Principais Funcionalidades
+
+- **Gestão de Paredes (Etapa 1):** Cadastro de dimensões (altura, comprimento, largura) com suporte a porta e janela.
+- **Cálculo de Concreto (Etapa 2):** Estimativa de volume para vigas baldrame com base nas paredes selecionadas.
+- **Cálculo de Tijolos (Etapa 3):** Quantidade baseada na área líquida e nas dimensões do tijolo informado.
+- **Relatório Completo:** Consolida concreto e tijolos em uma única requisição.
+
+## Tecnologias Utilizadas
+
+- **Linguagem:** Java 21
+- **Framework:** Spring Boot 3.3
+- **Banco de Dados:** H2 (in-memory)
+- **ORM:** Spring Data JPA / Hibernate
+- **Validação:** Bean Validation (Jakarta)
+- **Documentação:** Swagger UI (SpringDoc OpenAPI 2.5)
+
+---
+
+## Como Executar
 
 ```bash
 # 1. Clone o repositório
-git clone <url-do-repositorio>
+git clone https://github.com/DGodoi19/Calculadora-Obra-Residencial.git
 
 # 2. Entre na pasta
-cd CalculadoraObraResidencial
+cd Calculadora-Obra-Residencial
 
 # 3. Execute com Maven
 ./mvnw spring-boot:run
@@ -19,26 +41,31 @@ A API sobe em `http://localhost:8080`
 
 ---
 
-## Swagger UI
+## Documentação e Banco
 
-Acesse a documentação interativa:
-```
-http://localhost:8080/swagger-ui.html
-```
+| Recurso | URL |
+|---|---|
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| OpenAPI JSON | http://localhost:8080/v3/api-docs |
+| Console H2 | http://localhost:8080/h2-console |
 
-Console do banco H2 (dados em memória):
+**Configuração do H2:**
 ```
-http://localhost:8080/h2-console
 JDBC URL: jdbc:h2:mem:obra_residencial
+User:     sa
+Password: (vazio)
 ```
 
 ---
 
-## Endpoints
+## Guia de Testes — Ordem Recomendada
 
-### Etapa 1 — Paredes (arestas do grafo G=(V,A))
+Siga a ordem abaixo para testar corretamente no Swagger ou Postman:
 
-#### Criar parede
+### Etapa 1 — Cadastrar Paredes (arestas do grafo G=(V,A))
+
+Primeiro cadastre ao menos 2 ou 3 paredes. Anote os `id`s retornados para usar nas etapas seguintes.
+
 `POST /api/paredes`
 ```json
 {
@@ -50,12 +77,15 @@ JDBC URL: jdbc:h2:mem:obra_residencial
 }
 ```
 
-#### Listar paredes
+Para listar todas as paredes cadastradas:
+
 `GET /api/paredes`
 
 ---
 
-### Etapa 2 — Volume de concreto (viga baldrame)
+### Etapa 2 — Calcular Volume de Concreto (Viga Baldrame)
+
+Use os `id`s das paredes cadastradas na Etapa 1. Informe a altura da viga baldrame em metros.
 
 `POST /api/paredes/calculo/concreto`
 ```json
@@ -65,9 +95,13 @@ JDBC URL: jdbc:h2:mem:obra_residencial
 }
 ```
 
+**Fórmula:** `volume = comprimento × largura × alturaViga` (por parede)
+
 ---
 
-### Etapa 3 — Quantidade de tijolos
+### Etapa 3 — Calcular Quantidade de Tijolos
+
+Use os `id`s das paredes. Informe as dimensões do tijolo em metros.
 
 `POST /api/paredes/calculo/tijolos`
 ```json
@@ -78,9 +112,13 @@ JDBC URL: jdbc:h2:mem:obra_residencial
 }
 ```
 
+**Fórmula:** `tijolos = ceil(areaLiquida / (alturaTijolo × comprimentoTijolo))`
+
+> A área líquida desconta automaticamente os vãos de porta e janela.
+
 ---
 
-### Relatório completo (concreto + tijolos)
+### Relatório Completo (Etapas 2 + 3 em uma só chamada)
 
 `POST /api/calculos/processar`
 ```json
@@ -119,10 +157,10 @@ A planta é modelada como grafo **G=(V,A)**:
 - **Vértices (V)** → Pilares (encontros de paredes)
 - **Arestas (A)** → Paredes
 
-## Fórmulas implementadas
+## Fórmulas Implementadas
 
-| Cálculo | Fórmula |
-|---|---|
-| Volume concreto (viga) | `comprimento × largura × alturaViga` |
-| Área líquida da parede | `(comprimento × altura) − área_porta − área_janela` |
-| Quantidade de tijolos | `ceil(areaLiquida / (alturaTijolo × comprimentoTijolo))` |
+| Etapa | Cálculo | Fórmula |
+|---|---|---|
+| 2 | Volume de concreto (viga) | `comprimento × largura × alturaViga` |
+| 3 | Área líquida da parede | `(comprimento × altura) − área_porta − área_janela` |
+| 3 | Quantidade de tijolos | `ceil(areaLiquida / (alturaTijolo × comprimentoTijolo))` |

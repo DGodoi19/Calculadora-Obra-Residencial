@@ -10,7 +10,7 @@ public class ResultadoCalculoDTO {
     public ResultadoCalculoDTO() {}
 
     public ResultadoCalculoDTO(int paredesAnalisadas, Double areaLiquidaTotal,
-                                Double volumeConcretoM3, Long quantidadeTijolos) {
+                               Double volumeConcretoM3, Long quantidadeTijolos) {
         this.paredesAnalisadas = paredesAnalisadas;
         this.areaLiquidaTotal = areaLiquidaTotal;
         this.volumeConcretoM3 = volumeConcretoM3;
@@ -26,6 +26,6 @@ public class ResultadoCalculoDTO {
     public Double getVolumeConcretoM3() { return volumeConcretoM3; }
     public void setVolumeConcretoM3(Double volumeConcretoM3) { this.volumeConcretoM3 = volumeConcretoM3; }
 
-    public Long getQuantidadeTijolos() { return quantidadeTijolos; }
+    public Long getQuantidadeTijolos() { return quantidadeTijolos;  }
     public void setQuantidadeTijolos(Long quantidadeTijolos) { this.quantidadeTijolos = quantidadeTijolos; }
 }
