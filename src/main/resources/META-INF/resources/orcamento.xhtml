@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Calculadora de Materiais - UniCEUB</title>
+    <style type="text/css">
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .main-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .header-panel {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-panel h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header-panel p { margin: 5px 0 0 0; opacity: 0.8; font-size: 14px; }
+
+        /* --- ESTILIZAÇÃO DE ERROS EM VERMELHO E ALERTAS (UX) --- */
+        .ui-messages-error, .ui-message-error {
+            background-color: #fef2f2 !important;
+            border-color: #f87171 !important;
+            color: #dc2626 !important;
+            font-weight: 600;
+        }
+        .ui-messages-warn, .ui-message-warn {
+            background-color: #fffbeb !important;
+            border-color: #fbbf24 !important;
+            color: #d97706 !important;
+            font-weight: 600;
+        }
+        .error-summary-box .ui-messages-error-summary,
+        .error-summary-box .ui-messages-error-detail {
+            color: #dc2626 !important;
+        }
+
+        /* Layout Geral */
+        .ui-panel { margin-bottom: 15px !important; border-radius: 6px !important; }
+        .ui-panel-titlebar { background: #f8fafc !important; color: #1e293b !important; font-weight: 600 !important; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 10px; }
+        .input-box { display: flex; flex-direction: column; gap: 5px; }
+        .input-box label { font-size: 13px; font-weight: 500; color: #475569; }
+        .search-group { display: flex; gap: 5px; }
+        .actions-bar { display: flex; justify-content: flex-end; margin-top: 15px; }
+        .result-card { background: #ecfdf5; border-left: 5px solid #10b981; padding: 15px; border-radius: 4px; margin-top: 15px; }
+        .result-title { font-size: 16px; font-weight: 600; color: #065f46; margin-bottom: 10px; }
+    </style>
+</h:head>
+<h:body>
+    <div class="main-container">
+
+        <p:growl id="growlMessages" showDetail="true" life="4000" keepAlive="true" />
+
+        <div class="header-panel">
+            <h1>Calculadora de Materiais para Obra Residencial</h1>
+            <p>Componente de Engenharia de Software - Análise de Planta Baseada em Grafos G=(V,A)</p>
+        </div>
+
+        <h:form id="formOrcamento">
+
+            <p:messages id="pageMessages" showDetail="true" closable="true" styleClass="error-summary-box">
+                <p:autoUpdate />
+            </p:messages>
+
+            <p:panel header="1. Identificação e Parâmetros de Busca">
+                <div class="grid-inputs">
+                    <div class="input-box">
+                        <label>Nome do Usuário / Solicitante *</label>
+                        <p:inputText id="nomeUsuario" value="#{orcamentoBean.nomeUsuario}" required="true"
+                                     requiredMessage="O nome do usuário é obrigatório para registrar o orçamento."
+                                     placeholder="Digite seu nome completo" />
+                        <p:message for="nomeUsuario" display="text" />
+                    </div>
+                    <div class="input-box">
+                        <label>Nº do Orçamento para Localização</label>
+                        <div class="search-group">
+                            <p:inputNumber id="numOrcamento" value="#{orcamentoBean.numeroOrcamentoBusca}" decimalPlaces="0" placeholder="Ex: 1" style="flex-grow: 1;" />
+                            <p:commandButton value="Buscar"
+                                             action="#{orcamentoBean.buscarOrcamentoExistente}"
+                                             update="formOrcamento, growlMessages"
+                                             icon="pi pi-search"
+                                             styleClass="ui-button-raised ui-button-secondary" />
+                        </div>
+                        <p:message for="numOrcamento" display="text" />
+                    </div>
+                </div>
+            </p:panel>
+
+            <p:panel header="2. Cadastro de Dimensões da Planta (Paredes)">
+                <div class="grid-inputs">
+                    <div class="input-box">
+                        <label>Comprimento da Parede (m)</label>
+                        <p:inputNumber id="comprimento" value="#{orcamentoBean.comprimento}" min="0.1" decimalPlaces="2" placeholder="0.00" />
+                        <p:message for="comprimento" display="text" />
+                    </div>
+                    <div class="input-box">
+                        <label>Largura / Espessura (m)</label>
+                        <p:inputNumber id="largura" value="#{orcamentoBean.largura}" min="0.05" decimalPlaces="2" placeholder="0.15" />
+                        <p:message for="largura" display="text" />
+                    </div>
+                    <div class="input-box">
+                        <label>Altura / Pé-Direito (m)</label>
+                        <p:inputNumber id="altura" value="#{orcamentoBean.altura}" min="0.1" decimalPlaces="2" placeholder="3.00" />
+                        <p:message for="altura" display="text" />
+                    </div>
+                </div>
+
+                <h:outputText value="Vãos de Desconto Opcionais (Portas e Janelas):" style="display:block; margin: 15px 0 8px 0; font-weight: 600; color:#1e3a8a;" />
+                <div class="grid-inputs">
+                    <div class="input-box">
+                        <label>Largura da Porta (m)</label>
+                        <p:inputNumber id="larguraPorta" value="#{orcamentoBean.larguraPorta}" decimalPlaces="2" placeholder="0.90" />
+                    </div>
+                    <div class="input-box">
+                        <label>Altura da Porta (m)</label>
+                        <p:inputNumber id="alturaPorta" value="#{orcamentoBean.alturaPorta}" decimalPlaces="2" placeholder="2.10" />
+                    </div>
+                    <div class="input-box">
+                        <label>Largura da Janela (m)</label>
+                        <p:inputNumber id="larguraJanela" value="#{orcamentoBean.larguraJanela}" decimalPlaces="2" placeholder="1.20" />
+                    </div>
+                    <div class="input-box">
+                        <label>Altura da Janela (m)</label>
+                        <p:inputNumber id="alturaJanela" value="#{orcamentoBean.alturaJanela}" decimalPlaces="2" placeholder="1.20" />
+                    </div>
+                </div>
+
+                <div class="actions-bar">
+                    <p:commandButton value="Vincular Parede à Planta"
+                                     action="#{orcamentoBean.adicionarParede}"
+                                     update="formOrcamento, growlMessages"
+                                     icon="pi pi-plus"
+                                     styleClass="ui-button-outlined" />
+                </div>
+            </p:panel>
+
+            <p:panel header="3. Seleção de Estruturas da Planta Cadastrada">
+                <p:dataTable id="tabelaParedes"
+                             value="#{orcamentoBean.paredesDisponiveis}"
+                             var="parede"
+                             selection="#{orcamentoBean.paredesSelecionadas}"
+                             rowKey="#{parede.id}"
+                             emptyMessage="Nenhuma parede cadastrada na planta até o momento."
+                             style="margin-bottom:10px">
+
+                    <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+                    <p:column headerText="ID Estrutural" width="90">
+                        <h:outputText value="#{parede.id}" />
+                    </p:column>
+                    <p:column headerText="Dimensões Básicas (Comp x Larg x Alt)">
+                        <h:outputText value="#{parede.comprimento}m × #{parede.largura}m × #{parede.altura}m" />
+                    </p:column>
+                    <p:column headerText="Área Líquida (Descontada)">
+                        <h:outputText value="#{parede.areaLiquida} m²" />
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+
+            <p:panel header="4. Parâmetros Construtivos dos Materiais">
+                <div class="grid-inputs">
+                    <div class="input-box">
+                        <label>Altura da Viga Baldrame (m) *</label>
+                        <p:inputNumber id="viga" value="#{orcamentoBean.alturaVigaBaldrame}" decimalPlaces="2" required="true"/>
+                        <p:message for="viga" display="text" />
+                    </div>
+                    <div class="input-box">
+                        <label>Comprimento do Tijolo (m) *</label>
+                        <p:inputNumber id="compTijolo" value="#{orcamentoBean.comprimentoTijolo}" decimalPlaces="2" required="true"/>
+                        <p:message for="compTijolo" display="text" />
+                    </div>
+                    <div class="input-box">
+                        <label>Altura do Tijolo (m) *</label>
+                        <p:inputNumber id="altTijolo" value="#{orcamentoBean.alturaTijolo}" decimalPlaces="2" required="true"/>
+                        <p:message for="altTijolo" display="text" />
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <p:commandButton value="Calcular e Salvar Orçamento"
+                                     action="#{orcamentoBean.processarOrcamento}"
+                                     update="formOrcamento, growlMessages"
+                                     icon="pi pi-save"
+                                     style="font-size: 15px; padding: 5px 20px;" />
+                </div>
+            </p:panel>
+
+            <p:outputPanel id="painelResultado" rendered="#{orcamentoBean.resultadoFinal != null}">
+                <div class="result-card">
+                    <div class="result-title">
+                        <i class="pi pi-check-circle" style="margin-right: 5px;"></i> Memorial Descritivo do Orçamento
+                    </div>
+                    <div class="grid-inputs" style="color: #047857; font-size: 14px;">
+                        <div><strong>Solicitante:</strong> #{orcamentoBean.nomeUsuario}</div>
+                        <div><strong>Paredes Consolidadas:</strong> #{orcamentoBean.resultadoFinal.paredesAnalisadas} unidades</div>
+                        <div><strong>Área Líquida Alvenaria:</strong> #{orcamentoBean.resultadoFinal.areaLiquidaTotal} m²</div>
+                        <div><strong>Volume de Concreto (Viga):</strong> #{orcamentoBean.resultadoFinal.volumeConcretoM3} m³</div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #bbf7d0; margin: 12px 0;" />
+                    <div style="font-size: 18px; color: #065f46; font-weight: 700;">
+                        Quantidade Total de Tijolos: #{orcamentoBean.resultadoFinal.quantidadeTijolos} unidades
+                    </div>
+                </div>
+            </p:outputPanel>
+
+        </h:form>
+    </div>
+</h:body>
+</html>
